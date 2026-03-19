@@ -1,15 +1,36 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
+
+history = []
+
+class Question(BaseModel):
+    question: str
 
 @app.get("/")
 def read_root():
     return {"message": "Serveris veikia!"}
 
-@app.get("/hello")
-def say_hello(name: str = "drauge"):
-    return {"message": f"Sveikas, {name}!"}
+@app.post("/ask")
+def ask_ai(data: Question):
+    answer = f"Mock atsakymas į: {data.question}"
 
-@app.get("/sum")
-def calculate_sum(a: int, b: int):
-    return {"result": a + b}
+    history.append({
+        "question": data.question,
+        "answer": answer
+    })
+
+    return {
+        "question": data.question,
+        "answer": answer
+    }
+
+@app.get("/history")
+def get_history():
+    return history
+
+@app.delete("/history")
+def clear_history():
+    history.clear()
+    return {"message": "History cleared"}
